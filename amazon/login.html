@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="robots" content="noindex"><title>Artem Dashboard Reports</title></head>
+<body style="font:16px -apple-system,Segoe UI,Roboto,sans-serif;max-width:640px;margin:40px auto;padding:0 16px">
+<p id="m">Перенаправление в Seller Central…</p>
+<script>
+// OAuth Login URI: Amazon присылает amazon_callback_uri и amazon_state, мы возвращаем пользователя обратно в Seller Central.
+const q = new URLSearchParams(location.search);
+const cb = q.get('amazon_callback_uri'), as = q.get('amazon_state');
+let ok = false;
+try { const u = new URL(cb); ok = u.protocol === 'https:' && /(^|\.)sellercentral(-europe)?\.amazon\.[a-z.]+$/.test(u.hostname); } catch (e) {}
+if (ok && as) {
+  const st = Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, '0')).join('');
+  try { sessionStorage.setItem('lh_state', st); } catch (e) {}
+  const u = new URL(cb);
+  u.searchParams.set('redirect_uri', 'https://kovalartem11.github.io/amazon/callback.html');
+  u.searchParams.set('amazon_state', as);
+  u.searchParams.set('state', st);
+  u.searchParams.set('version', 'beta');
+  location.replace(u.toString());
+} else {
+  document.getElementById('m').textContent = 'Нет корректных параметров от Amazon. Начни подключение со страницы https://kovalartem11.github.io/amazon/';
+}
+</script></body></html>
