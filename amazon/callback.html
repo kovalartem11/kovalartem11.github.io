@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex"><meta name="referrer" content="no-referrer"><title>Artem Dashboard Reports — код</title>
+<style>body{font:16px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;max-width:680px;margin:40px auto;padding:0 16px;color:#222}
+code{display:block;padding:12px;background:#f4f4f4;border-radius:6px;word-break:break-all;font-size:15px}
+button,a.b{display:inline-block;margin:8px 8px 8px 0;padding:10px 16px;background:#1f6feb;color:#fff;border:0;border-radius:6px;text-decoration:none;font:inherit;cursor:pointer}
+.w{color:#b00}</style></head><body>
+<h1>Доступ подтверждён</h1>
+<div id="out"></div>
+<script>
+// OAuth Redirect URI: показываем одноразовый код (живёт 5 минут). Без client secret он бесполезен; обмен делает GitHub Action.
+const q = new URLSearchParams(location.search);
+const code = q.get('spapi_oauth_code'), spid = q.get('selling_partner_id'), st = q.get('state');
+let saved = null; try { saved = sessionStorage.getItem('lh_state'); } catch (e) {}
+const out = document.getElementById('out');
+const add = (h) => { const d = document.createElement('div'); d.innerHTML = h; out.appendChild(d); return d; };
+if (!code) { add('<p class="w">В адресе нет кода. Начни заново: <a href="./">страница подключения</a>.</p>'); }
+else {
+  if (saved && st && saved !== st) add('<p class="w">state не совпадает — если подключение начинал не ты, закрой страницу.</p>');
+  add('<p>1. Скопируй код (действует 5 минут):</p>');
+  const c = add('<code id="c"></code>'); c.querySelector('code').textContent = code;
+  const b = document.createElement('button'); b.textContent = 'Скопировать код'; b.onclick = () => navigator.clipboard.writeText(code).then(() => { b.textContent = 'Скопировано'; }); out.appendChild(b);
+  add('<p>Selling Partner ID: <b id="s"></b></p>').querySelector('#s').textContent = spid || '—';
+  add('<p>2. Открой GitHub Action, нажми <b>Run workflow</b>, выбери аккаунт, вставь код и Selling Partner ID, запусти.</p>');
+  add('<a class="b" target="_blank" rel="noopener" href="https://github.com/kovalartem11/amazon-reporting/actions/workflows/spapi_connect.yml">Открыть GitHub Action</a>');
+  history.replaceState(null, '', location.pathname);
+}
+</script></body></html>
